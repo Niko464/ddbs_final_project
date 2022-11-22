@@ -1,0 +1,23 @@
+{
+  "name": "ddbs_final_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Niko464/ddbs_final_project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Niko464/ddbs_final_project/issues"
+  },
+  "homepage": "https://github.com/Niko464/ddbs_final_project#readme",
+  "dependencies": {
+    "surrealdb.js": "^0.5.0"
+  },
+  "type": "module"
+}

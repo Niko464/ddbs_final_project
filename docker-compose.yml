@@ -1,0 +1,17 @@
+services:
+  db:
+    container_name: surreal_db
+    image: surrealdb/surrealdb
+    command: "start --user root --pass root -b 0.0.0.0:8000 file:/data/database.db"
+    volumes:
+      - database:/data
+    ports:
+      - 8000:8000
+
+volumes:
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      device: database
+      o: bind
