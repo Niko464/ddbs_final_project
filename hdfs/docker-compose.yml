@@ -1,0 +1,34 @@
+services:
+  namenode:
+    container_name: namenode
+    image: custom_namenode
+    build: ./namenode
+    ports:
+      - "9870:9870"
+    volumes:
+      - ./namenodeVolume:/data
+    networks:
+      - custom_hadoop_net
+    extra_hosts:
+      - "cona:127.0.0.1"
+
+  datanode:
+    container_name: datanode
+    hostname: conb
+    ports:
+      - "9864:9864"
+    image: custom_datanode
+    build: ./datanode
+    volumes:
+      - ./datanodeVolume:/data
+    depends_on:
+      - namenode
+    networks:
+      - custom_hadoop_net
+    extra_hosts:
+      - "conb:127.0.0.1"
+
+
+networks:
+  custom_hadoop_net:
+    driver: bridge
