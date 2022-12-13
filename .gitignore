@@ -2,3 +2,7 @@ database/
 node_modules/
 .vscode/
 package-lock.json
+hdfs/*Volume
+**/*.tar.gz
+hdfs/logs
+/data/**

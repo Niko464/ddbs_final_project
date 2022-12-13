@@ -18,6 +18,6 @@ RUN mkdir /data
 ADD core-site.xml /usr/local/hadoop/etc/hadoop/core-site.xml
 ADD hdfs-site.xml /usr/local/hadoop/etc/hadoop/hdfs-site.xml
 
-#set la variable d'environnement JAVA_HOME
+#set env vars
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk/
 ENV PATH="$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin"

@@ -9,12 +9,10 @@ services:
       - ./namenodeVolume:/data
     networks:
       - custom_hadoop_net
-    extra_hosts:
-      - "cona:127.0.0.1"
 
   datanode:
     container_name: datanode
-    hostname: conb
+    hostname: localhost
     ports:
       - "9864:9864"
     image: custom_datanode
@@ -25,8 +23,6 @@ services:
       - namenode
     networks:
       - custom_hadoop_net
-    extra_hosts:
-      - "conb:127.0.0.1"
 
 
 networks:

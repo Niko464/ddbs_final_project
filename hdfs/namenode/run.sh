@@ -5,6 +5,7 @@ if [ "`ls -A $namedir`" == "" ]; then
   hdfs namenode -format
 fi
 
-hdfs --daemon start namenode
+hdfs --daemon start namenode && hdfs dfsadmin -safemode leave
+
 
 sleep infinity
