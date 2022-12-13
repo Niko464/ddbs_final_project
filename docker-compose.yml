@@ -13,7 +13,10 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBRouter
-    command: mongos --configdb config/config1:27022,config2:27023
+        args:
+          - MONGO_ROUTER_PORT = 27017
+          - MONGO_CONFIG_SERVERS = config1:27022,config2:27023
+          - MONGO_ROUTER_REPLICA_SET_NAME = router
     ports:
       - 27017:27017
     networks:
@@ -25,7 +28,9 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBConfigServer
-    command: mongod --configsvr --replSet config
+        args:
+          - MONGO_CONFIG_SERVER_PORT = 27022
+          - MONGO_CONFIG_SERVER_REPLICA_SET_NAME = config
     ports:
       - 27022:27022
     networks:
@@ -35,7 +40,9 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBConfigServer
-    command: mongod --configsvr --replSet config
+        args:
+          - MONGO_CONFIG_SERVER_PORT = 27023
+          - MONGO_CONFIG_SERVER_REPLICA_SET_NAME = config
     ports:
       - 27023:27023
     networks:
@@ -47,7 +54,9 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBShardServer
-    command: mongod --shardsvr --replSet shard1
+        args:
+          - MONGO_SHARD_SERVER_PORT = 27018
+          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard1
     ports:
       - 27018:27018
     networks:
@@ -57,7 +66,9 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBShardServer
-    command: mongod --shardsvr --replSet shard2
+        args:
+          - MONGO_SHARD_SERVER_PORT = 27019
+          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard2
     ports:
       - 27019:27019
     networks:
@@ -67,7 +78,9 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBShardServer
-    command: mongod --shardsvr --replSet shard3
+        args:
+          - MONGO_SHARD_SERVER_PORT = 27020
+          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard3
     ports:
       - 27020:27020
     networks:
@@ -77,7 +90,9 @@ services:
       build:
         context: ./images
         dockerfile: images/mongoDBShardServer
-    command: mongod --shardsvr --replSet shard3
+        args:
+          - MONGO_SHARD_SERVER_PORT = 27021
+          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard3
     ports:
       - 27021:27021
     networks:

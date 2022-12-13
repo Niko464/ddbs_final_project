@@ -2,6 +2,7 @@ FROM mongo:6
 
 ARG MONGO_ROUTER_PORT
 ARG MONGO_ROUTER_REPLICA_SET_NAME
+ARG MONGO_CONFIG_SERVERS
 
 #copy the config file to the container
 COPY mongoDBRouter.conf /etc/mongod.conf
@@ -9,6 +10,7 @@ COPY mongoDBRouter.conf /etc/mongod.conf
 #replace the port and replica set name in the config file
 RUN sed -i "s/PORT/$MONGO_ROUTER_PORT/g" /etc/mongod.conf
 RUN sed -i "s/REPLICA_SET_NAME/$MONGO_ROUTER_REPLICA_SET_NAME/g" /etc/mongod.conf
+#RUN sed -i "s/CONFIG_SERVERS/$MONGO_CONFIG_SERVERS/g" /etc/mongod.conf
 
 #start the mongoDB server
 CMD ["mongod", "-f", "/etc/mongod.conf"]
