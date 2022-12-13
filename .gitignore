@@ -6,3 +6,4 @@ hdfs/*Volume
 **/*.tar.gz
 hdfs/logs
 /data/**
+.env
