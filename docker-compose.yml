@@ -1,17 +1,88 @@
-services:
-  db:
-    container_name: surreal_db
-    image: surrealdb/surrealdb
-    command: "start --user root --pass root -b 0.0.0.0:8000 file:/data/database.db"
-    volumes:
-      - database:/data
-    ports:
-      - 8000:8000
+# a mongo db database with sharding enabled and a replica set
+version: '3.2'
 
-volumes:
-  database:
-    driver: local
-    driver_opts:
-      type: none
-      device: database
-      o: bind
+# mongo db composition
+# 1 router
+# 3 shards with 1 shard replicated 2 times one on each db instance
+# 2 config servers (replica)
+
+services:
+  # router
+  router:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBRouter
+    command: mongos --configdb config/config1:27022,config2:27023
+    ports:
+      - 27017:27017
+    networks:
+      - mongo
+
+  # config servers
+  config1:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBConfigServer
+    command: mongod --configsvr --replSet config
+    ports:
+      - 27022:27022
+    networks:
+      - mongo
+  config2:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBConfigServer
+    command: mongod --configsvr --replSet config
+    ports:
+      - 27023:27023
+    networks:
+      - mongo
+
+  # shards
+  shard1:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBShardServer
+    command: mongod --shardsvr --replSet shard1
+    ports:
+      - 27018:27018
+    networks:
+      - mongo
+  shard2:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBShardServer
+    command: mongod --shardsvr --replSet shard2
+    ports:
+      - 27019:27019
+    networks:
+      - mongo
+  shard3:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBShardServer
+    command: mongod --shardsvr --replSet shard3
+    ports:
+      - 27020:27020
+    networks:
+      - mongo
+  shard4:
+    image:
+      build:
+        context: ./images
+        dockerfile: images/mongoDBShardServer
+    command: mongod --shardsvr --replSet shard3
+    ports:
+      - 27021:27021
+    networks:
+      - mongo
+
+networks:
+  mongo:
+    driver: bridge
