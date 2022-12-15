@@ -17,6 +17,9 @@ services:
         - MONGO_ROUTER_REPLICA_SET_NAME=router
     ports:
       - 27017:27017
+    depends_on:
+      - config1
+      - config2
     networks:
       - mongo
 
@@ -28,8 +31,11 @@ services:
       args:
         - MONGO_CONFIG_SERVER_PORT=27019
         - MONGO_CONFIG_SERVER_REPLICA_SET_NAME=config
-    ports:
-      - 27022:27022
+    depends_on:
+      - shardserver1
+      - shardserver2
+      - shardserver3
+      - shardserver4
     networks:
       - mongo
   config2:
@@ -39,8 +45,11 @@ services:
       args:
         - MONGO_CONFIG_SERVER_PORT=27019
         - MONGO_CONFIG_SERVER_REPLICA_SET_NAME=config
-    ports:
-      - 27023:27023
+    depends_on:
+      - shardserver1
+      - shardserver2
+      - shardserver3
+      - shardserver4
     networks:
       - mongo
 

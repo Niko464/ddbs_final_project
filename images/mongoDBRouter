@@ -12,5 +12,8 @@ RUN sed -i "s/PORT/$MONGO_ROUTER_PORT/g" /etc/mongod.conf
 RUN sed -i "s/REPLICA_SET_NAME/$MONGO_ROUTER_REPLICA_SET_NAME/g" /etc/mongod.conf
 #RUN sed -i "s/CONFIG_SERVERS/$MONGO_CONFIG_SERVERS/g" /etc/mongod.conf
 
+EXPOSE $MONGO_ROUTER_PORT
+
 #start the mongoDB server
-CMD ["mongos", "-f", "/etc/mongod.conf"]
+CMD mongos --config /etc/mongod.conf
+#CMD mongos --configdb config/config1:27018,config2:27019 --replSet $MONGO_ROUTER_REPLICA_SET_NAME --bind_ip_all

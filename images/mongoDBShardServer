@@ -14,5 +14,8 @@ COPY mongoDBShardServer.conf /etc/mongod.conf
 RUN sed -i "s/PORT/$MONGO_SHARD_SERVER_PORT/g" /etc/mongod.conf
 RUN sed -i "s/REPLICA_SET_NAME/$MONGO_SHARD_SERVER_REPLICA_SET_NAME/g" /etc/mongod.conf
 
+EXPOSE $MONGO_SHARD_SERVER_PORT
+
 #start the mongoDB server
-CMD mongod -f /etc/mongod.conf
+CMD ["mongod", "--config", "/etc/mongod.conf"]
+#CMD mongod --shardsvr --replSet $MONGO_SHARD_SERVER_REPLICA_SET_NAME --port $MONGO_SHARD_SERVER_PORT --bind_ip_all
