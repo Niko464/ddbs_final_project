@@ -1,5 +1,5 @@
 # a mongo db database with sharding enabled and a replica set
-version: '3.2'
+version: '3.7'
 
 # mongo db composition
 # 1 router
@@ -9,14 +9,12 @@ version: '3.2'
 services:
   # router
   router:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBRouter
-        args:
-          - MONGO_ROUTER_PORT = 27017
-          - MONGO_CONFIG_SERVERS = config1:27022,config2:27023
-          - MONGO_ROUTER_REPLICA_SET_NAME = router
+    build:
+      context: ./images
+      dockerfile: mongoDBRouter
+      args:
+        - MONGO_ROUTER_PORT=27017
+        - MONGO_ROUTER_REPLICA_SET_NAME=router
     ports:
       - 27017:27017
     networks:
@@ -24,77 +22,83 @@ services:
 
   # config servers
   config1:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBConfigServer
-        args:
-          - MONGO_CONFIG_SERVER_PORT = 27022
-          - MONGO_CONFIG_SERVER_REPLICA_SET_NAME = config
+    build:
+      context: ./images
+      dockerfile: mongoDBConfigServer
+      args:
+        - MONGO_CONFIG_SERVER_PORT=27019
+        - MONGO_CONFIG_SERVER_REPLICA_SET_NAME=config
     ports:
       - 27022:27022
     networks:
       - mongo
   config2:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBConfigServer
-        args:
-          - MONGO_CONFIG_SERVER_PORT = 27023
-          - MONGO_CONFIG_SERVER_REPLICA_SET_NAME = config
+    build:
+      context: ./images
+      dockerfile: mongoDBConfigServer
+      args:
+        - MONGO_CONFIG_SERVER_PORT=27019
+        - MONGO_CONFIG_SERVER_REPLICA_SET_NAME=config
     ports:
       - 27023:27023
     networks:
       - mongo
 
   # shards
-  shard1:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBShardServer
-        args:
-          - MONGO_SHARD_SERVER_PORT = 27018
-          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard1
-    ports:
-      - 27018:27018
+  shardserver1:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard1
     networks:
       - mongo
-  shard2:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBShardServer
-        args:
-          - MONGO_SHARD_SERVER_PORT = 27019
-          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard2
-    ports:
-      - 27019:27019
+  shardserver2:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard2
     networks:
       - mongo
-  shard3:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBShardServer
-        args:
-          - MONGO_SHARD_SERVER_PORT = 27020
-          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard3
-    ports:
-      - 27020:27020
+  shardserver3:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard3
+        - SHARDING_MEMBER_3=shardServer3:27018
+        - SHARDING_MEMBER_4=shardServer4:27018
     networks:
       - mongo
-  shard4:
-    image:
-      build:
-        context: ./images
-        dockerfile: images/mongoDBShardServer
-        args:
-          - MONGO_SHARD_SERVER_PORT = 27021
-          - MONGO_SHARD_SERVER_REPLICA_SET_NAME = shard3
-    ports:
-      - 27021:27021
+  shardserver4:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard3
+        - SHARDING_MEMBER_3=shardServer3:27018
+        - SHARDING_MEMBER_4=shardServer4:27018
+    networks:
+      - mongo
+
+  live:
+    container_name: live
+    depends_on:
+      - router
+      - config1
+      - config2
+      - shardserver1
+      - shardserver2
+      - shardserver3
+      - shardserver4
+    build:
+      context: ./images
+      dockerfile: mongoDBLive
     networks:
       - mongo
 

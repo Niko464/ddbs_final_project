@@ -13,4 +13,4 @@ RUN sed -i "s/REPLICA_SET_NAME/$MONGO_ROUTER_REPLICA_SET_NAME/g" /etc/mongod.con
 #RUN sed -i "s/CONFIG_SERVERS/$MONGO_CONFIG_SERVERS/g" /etc/mongod.conf
 
 #start the mongoDB server
-CMD ["mongod", "-f", "/etc/mongod.conf"]
+CMD ["mongos", "-f", "/etc/mongod.conf"]

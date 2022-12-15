@@ -1,0 +1,10 @@
+FROM mongo:6
+
+
+#copy the config file to the container
+COPY script.sh .
+COPY livescript.js .
+
+#start the mongoDB server
+CMD ["bash", "script.sh"]
+#CMD ["mongosh", "-f", "livescript.js", ]

@@ -8,11 +8,17 @@ ARG MONGO_SHARDING_MEMBER_3
 ARG MONGO_SHARDING_MEMBER_4
 
 #copy the config file to the container
-COPY mongoDBShardServer.conf /etc/mongod.conf
+COPY mongoDBShardServerRep.conf /etc/mongod.conf
 
 #replace the port and replica set name in the config file
 RUN sed -i "s/PORT/$MONGO_SHARD_SERVER_PORT/g" /etc/mongod.conf
 RUN sed -i "s/REPLICA_SET_NAME/$MONGO_SHARD_SERVER_REPLICA_SET_NAME/g" /etc/mongod.conf
 
+#replace the shard members in the config file
+RUN sed -i "s/SHARDING_MEMBER_1/$MONGO_SHARDING_MEMBER_1/g" /etc/mongod.conf
+RUN sed -i "s/SHARDING_MEMBER_2/$MONGO_SHARDING_MEMBER_2/g" /etc/mongod.conf
+RUN sed -i "s/SHARDING_MEMBER_3/$MONGO_SHARDING_MEMBER_3/g" /etc/mongod.conf
+RUN sed -i "s/SHARDING_MEMBER_4/$MONGO_SHARDING_MEMBER_4/g" /etc/mongod.conf
+
 #start the mongoDB server
-CMD mongod -f /etc/mongod.conf
+CMD ["mongod", "-f", "/etc/mongod.conf"]
