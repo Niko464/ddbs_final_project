@@ -22,8 +22,9 @@ mongosh --host shardserver3 --port 27018 --eval \
 echo "Initializing router in 10 seconds..."
 sleep 10
 
-#mongosh --host router --port 27017 --eval;
 mongosh --host router --port 27017 --file livescript.js
 
-# sh.addShard("config/config1:27019,config2:27019");
+echo "MongoDB cluster initialized! Sleeping forever..."
+echo "You can now connect to the cluster on localhost:27017"
+
 sleep 999999

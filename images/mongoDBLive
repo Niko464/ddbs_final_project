@@ -7,4 +7,3 @@ COPY livescript.js .
 
 #start the mongoDB server
 CMD ["bash", "script.sh"]
-#CMD ["mongosh", "-f", "livescript.js", ]
