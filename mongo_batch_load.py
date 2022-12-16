@@ -23,16 +23,15 @@ db = client['test']
 batch=[]
 for name in ["user","read","article"]:
     print(f"Loading {name} into mongo")
-    nametmp = name + "tmp"
     start_time = time.time()
     for line in open(f'/home/cbihan/db-generation/{name}.dat').readlines():
         l=json.loads(line)
         batch.append(l)
         if len(batch)==batch_size:
-            db[nametmp].insert_many(batch)
+            db[name].insert_many(batch)
             batch=[]
     if len(batch)>0:
-        db[nametmp].insert_many(batch)
+        db[name].insert_many(batch)
         batch = []
     end_time = time.time()
     print(f"Loaded {name} into mongo in {end_time-start_time} seconds")

@@ -1,9 +1,22 @@
 FROM mongo:6
 
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    vim
+
+#install latest nodejs lts and npm
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get install -y nodejs
+
+WORKDIR /usr/app
+
+RUN npm install mongodb
 
 #copy the config file to the container
 COPY script.sh .
 COPY livescript.js .
+COPY change.js .
 
 #start the mongoDB server
 CMD ["bash", "script.sh"]
