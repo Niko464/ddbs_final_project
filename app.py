@@ -1,5 +1,11 @@
 import sys
 import pymongo
+from hdfs import InsecureClient
+import shutil
+import os
+
+ARTICLE_NAME = "article"
+hdfsclient = InsecureClient("http://localhost:9870", user="root")
 
 class bcolors:
     HEADER = '\033[95m'
@@ -11,6 +17,19 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+def downloadEntireArticle(hdfsclient, path, articleId):
+    local_path = path + str(articleId)
+    #if the path exists, remove it
+    if os.path.exists(local_path):
+        shutil.rmtree(local_path)
+    hdfs_path = f"/data/articles/{articleId}/"
+    print(f"Downloading {hdfs_path} to {local_path}")
+    hdfsclient.download(
+        hdfs_path=hdfs_path,
+        local_path=local_path,
+        overwrite=True,
+    )
 
 def logError(msg):
 	print(bcolors.FAIL + "ERROR " + msg + bcolors.ENDC)
@@ -69,6 +88,15 @@ def handleArticleQuery(db):
         return
     print("The requested article:")
     print(article)
+    print("Downloading the article's content...")
+    downloadEntireArticle(hdfsclient, "./", ARTICLE_NAME + str(article["aid"]))
+    print("The article's content:")
+    with open(f"./{ARTICLE_NAME}{article['aid']}/" + article["text"], "r") as f:
+        print(f.read())
+    print("You can also go check out the article's media content that we downloaded at the following path:")
+    print(f"./{ARTICLE_NAME}{article['aid']}")
+    
+
 
 def handleBeReadQuery(db):
     if hasEnoughArgs(4, "article id", "query") == False:
