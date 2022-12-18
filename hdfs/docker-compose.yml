@@ -18,7 +18,7 @@ services:
     image: custom_datanode
     build: ./datanode
     volumes:
-      - ./datanodeVolume:/data
+      - ./datanodeVolume:/tmp/hadoop-root/dfs/data
     depends_on:
       - namenode
     networks:
