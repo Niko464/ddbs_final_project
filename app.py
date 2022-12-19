@@ -62,7 +62,7 @@ def printGeneralUsage(level=None):
 def handleUserQuery(db):
     if hasEnoughArgs(4, "user id", "query") == False:
         return
-    user = db.users.find_one({"uid": sys.argv[3]})
+    user = db.user.find_one({"uid": sys.argv[3]})
     if user == None:
         logError("No user found with that uid")
         return
@@ -82,7 +82,7 @@ def handleReadQuery(db):
 def handleArticleQuery(db):
     if hasEnoughArgs(4, "article id", "query") == False:
         return
-    article = db.articles.find_one({"aid": sys.argv[3]})
+    article = db.article.find_one({"aid": sys.argv[3]})
     if article == None:
         logError("No article found with that aid")
         return
@@ -101,7 +101,7 @@ def handleArticleQuery(db):
 def handleBeReadQuery(db):
     if hasEnoughArgs(4, "article id", "query") == False:
         return
-    beRead = db.beRead.find_one({"aid": sys.argv[3]})
+    beRead = db.beread.find_one({"aid": sys.argv[3]})
     if beRead == None:
         logError("No beRead found with that aid")
         return
@@ -111,13 +111,13 @@ def handleBeReadQuery(db):
 def handlePopularQuery(db):
     if hasEnoughArgs(5, "timestamp or granularity", "query") == False:
         return
-    popular = db.popular.find_one({"timestamp": sys.argv[3], "granularity": sys.argv[4]})
+    popular = db.popularrank.find_one({"timestamp": sys.argv[3], "granularity": sys.argv[4]})
     if popular == None:
         logError("No popular found with that timestamp and granularity")
         return
     print("The requested popular articles:")
     for aid in popular["articleAidList"]:
-        article = db.articles.find_one({"aid": aid})
+        article = db.article.find_one({"aid": aid})
         print(article)
 
 
@@ -125,23 +125,23 @@ def handlePopularQuery(db):
 def handleUpdateUser(db):
     if hasEnoughArgs(4, "user id", "update") == False:
         return
-    currentUser = db.users.find_one({"uid": sys.argv[3]})
+    currentUser = db.user.find_one({"uid": sys.argv[3]})
     if currentUser == None:
         logError("No user found with that uid")
         return
     newRegion = "Beijing" if currentUser["region"] == "Hong Kong" else "Hong Kong"
-    user = db.users.update_one({"uid": sys.argv[3]}, {"$set": {"region": newRegion}})
+    user = db.user.update_one({"uid": sys.argv[3]}, {"$set": {"region": newRegion}})
     print(f"Updated the user's region from {currentUser['region']} to {newRegion}")
 
 def handleUpdateArticle(db):
     if hasEnoughArgs(4, "article id", "update") == False:
         return
-    currentArticle = db.articles.find_one({"aid": sys.argv[3]})
+    currentArticle = db.article.find_one({"aid": sys.argv[3]})
     if currentArticle == None:
         logError("No article found with that aid")
         return
     newCategory = "science" if currentArticle["category"] == "technology" else "technology"
-    article = db.articles.update_one({"aid": sys.argv[3]}, {"$set": {"category": newCategory}})
+    article = db.article.update_one({"aid": sys.argv[3]}, {"$set": {"category": newCategory}})
     print(f"Updated the article's category from {currentArticle['category']} to {newCategory}")
 
 
