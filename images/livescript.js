@@ -24,12 +24,90 @@ sh.splitAt("test.read", { region: "Hong Kong" })
 sh.moveChunk("test.read", { region: "Beijing" }, "shard1")
 sh.moveChunk("test.read", { region: "Hong Kong" }, "shard2")
 
-sh.shardCollection("test.be-read", {category:1})
-sh.disableBalancing("test.be-read")
-sh.splitAt("test.be-read", { category: "science" })
-sh.splitAt("test.be-read", { category: "technology" })
-sh.moveChunk("test.be-read", { category: "science" }, "shard3")
-sh.moveChunk("test.be-read", { category: "technology" }, "shard2")
+sh.shardCollection("test.beread", {category:1})
+sh.disableBalancing("test.beread")
+sh.splitAt("test.beread", { category: "science" })
+sh.splitAt("test.beread", { category: "technology" })
+sh.moveChunk("test.beread", { category: "science" }, "shard3")
+sh.moveChunk("test.beread", { category: "technology" }, "shard2")
+
+sh.shardCollection("test.popularrank", {temporalGranularity:1})
+sh.disableBalancing("test.popularrank")
+sh.splitAt("test.popularrank", { temporalGranularity: "weekly" })
+sh.splitAt("test.popularrank", { temporalGranularity: "monthly" })
+sh.moveChunk("test.popularrank", { temporalGranularity: "daily" }, "shard1")
+sh.moveChunk("test.popularrank", { temporalGranularity: "weekly" }, "shard2")
+sh.moveChunk("test.popularrank", { temporalGranularity: "monthly" }, "shard2")
+
+// https://www.tecmint.com/monitor-mongodb-performance/
+db.read.aggregate([
+  // Group the documents by "aid" (article ID)
+  {
+      $group: {
+          _id: "$aid",
+          readNum: { $sum: 1 }, // Count the number of reads for each article
+          readUidList: { $push: "$uid" }, // Collect a list of all the user IDs that have read the article
+          commentNum: { $sum: { $cond: [ "$commentOrNot", 1, 0 ] } }, // Count the number of comments for each article
+          commentUidList: { $push: { $cond: [ "$commentOrNot", "$uid", null ] } }, // Collect a list of all the user IDs that have commented on the article
+          agreeNum: { $sum: { $cond: [ "$agreeOrNot", 1, 0 ] } }, // Count the number of agrees for each article
+          agreeUidList: { $push: { $cond: [ "$agreeOrNot", "$uid", null ] } }, // Collect a list of all the user IDs that have agreed on the article
+          shareNum: { $sum: { $cond: [ "$shareOrNot", 1, 0 ] } }, // Count the number of shares for each article
+          shareUidList: { $push: { $cond: [ "$shareOrNot", "$uid", null ] } } // Collect a list of all the user IDs that have shared the article
+      }
+  },
+  // Replace or upsert the documents in the "beRead" collection
+  {
+      $replaceWith: {
+          $mergeObjects: [
+              { _id: "$_id", timestamp: new Date() }, // Use the article ID as the _id and set the current timestamp
+              "$$ROOT" // Use the rest of the fields from the grouped documents
+          ]
+      }
+  },
+  {
+      $out: "beread"
+  }
+], { allowDiskUse: true })
+
+db.beread.aggregate([
+  // Match documents from the current day
+  {
+      $match: {
+          timestamp: {
+              $gte: new Date(new Date().setHours(0,0,0)),
+              $lt: new Date(new Date().setHours(24,0,0))
+          }
+      }
+  },
+  // Sort the documents by readNum in descending order
+  {
+      $sort: { readNum: -1 }
+  },
+  // Limit the results to the top 5 documents
+  {
+      $limit: 5
+  },
+  // Project only the _id field
+  {
+      $project: {
+          _id: 1
+      }
+  },
+  // Create a new document with the current timestamp and temporalGranularity set to "daily"
+  {
+      $replaceWith: {
+          _id: new ObjectId(),
+          timestamp: new Date(),
+          temporalGranularity: "daily",
+          articleAidList: "$$ROOT"
+      }
+  },
+  {
+      $out: "popularrank"
+  }
+], { allowDiskUse: true })
+
+
 
 // missing popular rank collection
 /*

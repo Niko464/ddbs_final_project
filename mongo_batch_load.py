@@ -24,7 +24,9 @@ batch=[]
 for name in ["user","read","article"]:
     print(f"Loading {name} into mongo")
     start_time = time.time()
-    for line in open(f'/home/cbihan/db-generation/{name}.dat').readlines():
+    file_lines = open(f'/home/cbihan/db-generation/{name}.dat').readlines()
+    batch_size = max(5000, len(file_lines)//10)
+    for line in file_lines:
         l=json.loads(line)
         batch.append(l)
         if len(batch)==batch_size:
