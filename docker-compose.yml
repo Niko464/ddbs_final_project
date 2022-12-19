@@ -1,0 +1,149 @@
+# a mongo db database with sharding enabled and a replica set
+version: '3.7'
+
+# mongo db composition
+# 1 router
+# 3 shards with 1 shard replicated 2 times one on each db instance
+# 2 config servers (replica)
+
+services:
+  # router
+  router:
+    build:
+      context: ./images
+      dockerfile: mongoDBRouter
+      args:
+        - MONGO_ROUTER_PORT=27017
+        - MONGO_ROUTER_REPLICA_SET_NAME=router
+    ports:
+      - 27017:27017
+    depends_on:
+      - config1
+      - config2
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --port 27017 --eval 'db.runCommand({ connectionStatus: 1 })'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - mongo
+
+  # config servers
+  config1:
+    build:
+      context: ./images
+      dockerfile: mongoDBConfigServer
+      args:
+        - MONGO_CONFIG_SERVER_PORT=27019
+        - MONGO_CONFIG_SERVER_REPLICA_SET_NAME=config
+    depends_on:
+      - shardserver1
+      - shardserver2
+      - shardserver3
+      - shardserver4
+    networks:
+      - mongo
+  config2:
+    build:
+      context: ./images
+      dockerfile: mongoDBConfigServer
+      args:
+        - MONGO_CONFIG_SERVER_PORT=27019
+        - MONGO_CONFIG_SERVER_REPLICA_SET_NAME=config
+    depends_on:
+      - shardserver1
+      - shardserver2
+      - shardserver3
+      - shardserver4
+    networks:
+      - mongo
+
+  # shards
+  shardserver1:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard1
+    networks:
+      - mongo
+  shardserver2:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard2
+    networks:
+      - mongo
+  shardserver3:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard3
+        - SHARDING_MEMBER_3=shardServer3:27018
+        - SHARDING_MEMBER_4=shardServer4:27018
+    networks:
+      - mongo
+  shardserver4:
+    build:
+      context: ./images
+      dockerfile: mongoDBShardServer
+      args:
+        - MONGO_SHARD_SERVER_PORT=27018
+        - MONGO_SHARD_SERVER_REPLICA_SET_NAME=shard3
+        - SHARDING_MEMBER_3=shardServer3:27018
+        - SHARDING_MEMBER_4=shardServer4:27018
+    networks:
+      - mongo
+
+  live:
+    container_name: live
+    depends_on:
+      - router
+      - config1
+      - config2
+      - shardserver1
+      - shardserver2
+      - shardserver3
+      - shardserver4
+    build:
+      context: ./images
+      dockerfile: mongoDBLive
+    networks:
+      - mongo
+
+  # monitoring:
+  #   image: prom/prometheus
+  #   container_name: monitoring
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   depends_on:
+  #     router:
+  #       condition: service_healthy
+  #   networks:
+  #     - mongo
+
+  #run mongo-express
+  mongo-express:
+    image: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: router
+      ME_CONFIG_MONGODB_PORT: 27017
+    ports:
+      - 8081:8081
+    depends_on:
+      router:
+        condition: service_healthy
+    networks:
+      - mongo
+
+
+networks:
+  mongo:
+    driver: bridge

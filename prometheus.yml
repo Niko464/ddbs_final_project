@@ -1,0 +1,67 @@
+# create all the needed things to get interesting mongo db metrics
+
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: []
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'mongo'
+    static_configs:
+      - targets: ['router:27017']
+        labels:
+          instance: 'mongo'
+
+# Path: first.rules
+# rules to create some alerts
+
+groups:
+  - name: example
+    rules:
+      - alert: HighErrorRate
+        expr: 100 * sum(rate(http_requests_total{code=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) > 10
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: High error rate
+          description: '{{ $labels.job }} has seen more than 10% errors in the last 10 minutes'
+
+# Path: second.rules
+# rules to create some alerts
+
+groups:
+  - name: example
+    rules:
+      - alert: HighErrorRate
+        expr: 100 * sum(rate(http_requests_total{code=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) > 10
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: High error rate
+          description: '{{ $labels.job }} has seen more than 10% errors in the last 10 minutes'
+
+# Path: first.rules
+# rules to create some alerts
+
+groups:
+  - name: example
+    rules

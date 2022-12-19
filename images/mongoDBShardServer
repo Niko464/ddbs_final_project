@@ -1,0 +1,21 @@
+FROM mongo:6
+
+ARG MONGO_SHARD_SERVER_PORT
+ARG MONGO_SHARD_SERVER_REPLICA_SET_NAME
+ARG MONGO_SHARDING_MEMBER_1
+ARG MONGO_SHARDING_MEMBER_2
+ARG MONGO_SHARDING_MEMBER_3
+ARG MONGO_SHARDING_MEMBER_4
+
+#copy the config file to the container
+COPY mongoDBShardServer.conf /etc/mongod.conf
+
+#replace the port and replica set name in the config file
+RUN sed -i "s/PORT/$MONGO_SHARD_SERVER_PORT/g" /etc/mongod.conf
+RUN sed -i "s/REPLICA_SET_NAME/$MONGO_SHARD_SERVER_REPLICA_SET_NAME/g" /etc/mongod.conf
+
+EXPOSE $MONGO_SHARD_SERVER_PORT
+
+#start the mongoDB server
+CMD ["mongod", "--config", "/etc/mongod.conf"]
+#CMD mongod --shardsvr --replSet $MONGO_SHARD_SERVER_REPLICA_SET_NAME --port $MONGO_SHARD_SERVER_PORT --bind_ip_all
