@@ -3,6 +3,8 @@ import pymongo
 from hdfs import InsecureClient
 import shutil
 import os
+from bson import ObjectId
+import time
 
 ARTICLE_NAME = "article"
 hdfsclient = InsecureClient("http://localhost:9870", user="root")
@@ -111,7 +113,7 @@ def handleBeReadQuery(db):
 def handlePopularQuery(db):
     if hasEnoughArgs(5, "timestamp or granularity", "query") == False:
         return
-    popular = db.popularrank.find_one({"timestamp": sys.argv[3], "granularity": sys.argv[4]})
+    popular = db.popularrank.find_one({ "timestamp": sys.argv[3], "granularity": sys.argv[4]})
     if popular == None:
         logError("No popular found with that timestamp and granularity")
         return
@@ -125,41 +127,40 @@ def handlePopularQuery(db):
 def handleUpdateUser(db):
     if hasEnoughArgs(4, "user id", "update") == False:
         return
-    currentUser = db.user.find_one({"uid": sys.argv[3]})
+    currentUser = db.user.find_one({"_id": ObjectId(sys.argv[3])})
     if currentUser == None:
         logError("No user found with that uid")
         return
-    newRegion = "Beijing" if currentUser["region"] == "Hong Kong" else "Hong Kong"
-    user = db.user.update_one({"uid": sys.argv[3]}, {"$set": {"region": newRegion}})
-    print(f"Updated the user's region from {currentUser['region']} to {newRegion}")
+    user = db.user.update_one({"_id": ObjectId(sys.argv[3])}, {"$set": {sys.argv[4]: sys.argv[5]}})
+    print(f"Updated the user's region from {currentUser[sys.argv[4]]} to {sys.argv[5]}")
 
 def handleUpdateArticle(db):
     if hasEnoughArgs(4, "article id", "update") == False:
         return
-    currentArticle = db.article.find_one({"aid": sys.argv[3]})
+    currentArticle = db.article.find_one({"_id": ObjectId(sys.argv[3])})
     if currentArticle == None:
         logError("No article found with that aid")
         return
-    newCategory = "science" if currentArticle["category"] == "technology" else "technology"
-    article = db.article.update_one({"aid": sys.argv[3]}, {"$set": {"category": newCategory}})
-    print(f"Updated the article's category from {currentArticle['category']} to {newCategory}")
+    article = db.article.update_one({"_id": ObjectId(sys.argv[3])}, {"$set": {sys.argv[4]: sys.argv[5]}})
+    print(f"Updated the article's category from {currentArticle[sys.argv[4]]} to {sys.argv[5]}")
 
 
 
 def handleInsertRead(db):
-    if hasEnoughArgs(6, "user id or article id or timestamp", "insert") == False:
+    if hasEnoughArgs(5, "user id or article id", "insert") == False:
         return
+    ts = int(time.time() * 1000)
     read = db.read.insert_one({
         "uid": sys.argv[3],
         "aid": sys.argv[4],
-        "timestamp": sys.argv[5],
+        "timestamp": ts,
         "readTimeLength": "75",
         "agreeOrNot": "0",
         "commentOrNot": "0",
         "shareOrNot": "0",
         "commentDetail": "comments to this article: (456,2865)"
     })
-    print(f"Inserted read with uid {sys.argv[3]}, aid {sys.argv[4]}, and timestamp {sys.argv[5]}")
+    print(f"Inserted read with uid {sys.argv[3]}, aid {sys.argv[4]}, and timestamp {ts}")
 
 
 def main():
@@ -180,7 +181,7 @@ def main():
         }
     }
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    db = myclient["mydatabase"]
+    db = myclient["test"]
 
     if len(sys.argv) < 2:
         printGeneralUsage()
