@@ -143,7 +143,35 @@ services:
     networks:
       - mongo
 
+  namenode:
+    container_name: namenode
+    image: custom_namenode
+    build: ./hdfs/namenode
+    ports:
+      - "9870:9870"
+    volumes:
+      - ./hdfs/namenodeVolume:/data
+    networks:
+      - custom_hadoop_net
+
+  datanode:
+    container_name: datanode
+    hostname: localhost
+    ports:
+      - "9864:9864"
+    image: custom_datanode
+    build: ./hdfs/datanode
+    volumes:
+      - ./hdfs/datanodeVolume:/tmp/hadoop-root/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - custom_hadoop_net
+
+
 
 networks:
   mongo:
+    driver: bridge
+  custom_hadoop_net:
     driver: bridge
