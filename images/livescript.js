@@ -38,7 +38,7 @@ sh.splitAt("test.popularrank", { temporalGranularity: "monthly" });
 sh.moveChunk("test.popularrank", { temporalGranularity: "daily" }, "shard1");
 sh.moveChunk("test.popularrank", { temporalGranularity: "weekly" }, "shard2");
 sh.moveChunk("test.popularrank", { temporalGranularity: "monthly" }, "shard2");
-
+/*
 // https://www.tecmint.com/monitor-mongodb-performance/
 db.read.aggregate(
   [
@@ -48,6 +48,7 @@ db.read.aggregate(
         _id: "$aid",
         readNum: { $sum: 1 }, // Count the number of reads for each article
         readUidList: { $push: "$uid" }, // Collect a list of all the user IDs that have read the article
+        category: {"$first": "$category"},
         commentNum: {
           $sum: { $cond: [{ $eq: ["$commentOrNot", "1"] }, 1, 0] },
         }, // Count the number of comments for each article
@@ -64,23 +65,35 @@ db.read.aggregate(
         }, // Collect a list of all the user IDs that have shared the article
       },
     },
+    {
+      $lookup: {
+        from: "article",
+        localField: "_id",
+        foreignField: "aid",
+        as: "article",
+      },
+    },
+    // Unwind the "article" array
+    {
+      $unwind: "$article",
+    },
     // Replace or upsert the documents in the "beRead" collection
     {
       $replaceWith: {
         $mergeObjects: [
-          { _id: "$_id", timestamp: new Date() }, // Use the article ID as the _id and set the current timestamp
+          { _id: "$_id", timestamp: new Date(), category: "$article.category" }, // Use the article ID as the _id and set the current timestamp
           "$$ROOT", // Use the rest of the fields from the grouped documents
         ],
       },
     },
     {
-      $out: "truc2",
+      $out: "truc",
     },
   ],
   { allowDiskUse: true }
 );
 
-db.beread.aggregate(
+db.truc2.aggregate(
   [
     // Match documents from the current day
     {
@@ -115,12 +128,12 @@ db.beread.aggregate(
       },
     },
     {
-      $out: "popularrank",
+      $out: "popularrank2",
     },
   ],
   { allowDiskUse: true }
 );
-
+*/
 // missing popular rank collection
 /*
 db.getSiblingDB("test").createTrigger({
@@ -184,4 +197,26 @@ db.getSiblingDB("test").createTrigger({
       db.beRead.save(beReadDoc);
     }
   });
+  */
+/*
+  db.truc.aggregate([
+    {
+       $lookup:
+          {
+            from: "article",
+            localField: "aid",
+            foreignField: "aid",
+            as: "article_docs"
+          }
+    },
+    {
+       $unwind: "$article_docs"
+    },
+    {
+       $match: { "article_docs.category": { $in: ["science", "technology"] } }
+    },
+    {
+       $out: "sharded_beread"
+    }
+  ], { allowDiskUse: true })
   */
