@@ -116,32 +116,32 @@ services:
     networks:
       - mongo
 
-  monitoring:
-    image: prom/prometheus
-    container_name: monitoring
-    ports:
-      - 9090:9090
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      router:
-        condition: service_healthy
-    networks:
-      - mongo
-
-  # run mongo-express
-  # mongo-express:
-  #   image: mongo-express
-  #   environment:
-  #     ME_CONFIG_MONGODB_SERVER: router
-  #     ME_CONFIG_MONGODB_PORT: 27017
+  # monitoring:
+  #   image: prom/prometheus
+  #   container_name: monitoring
   #   ports:
-  #     - 8081:8081
+  #     - 9090:9090
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
   #   depends_on:
   #     router:
   #       condition: service_healthy
   #   networks:
   #     - mongo
+
+  #run mongo-express
+  mongo-express:
+    image: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: router
+      ME_CONFIG_MONGODB_PORT: 27017
+    ports:
+      - 8081:8081
+    depends_on:
+      router:
+        condition: service_healthy
+    networks:
+      - mongo
 
 
 networks:
