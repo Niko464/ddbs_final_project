@@ -21,9 +21,16 @@ def main():
     except pymongo.errors.ServerSelectionTimeoutError as err:
         print(err)
         sys.exit(1)
-    #batch_load_into_db(db, data_folder)
+
+    start = time.time()
+    batch_load_into_db(db, data_folder)
+    print(f"Batch load into db took {time.time()-start} seconds")
+    start = time.time()
     generate_be_read(db)
-    #generate_popular_rank(db)
+    print(f"Generate be read took {time.time()-start} seconds")
+    start = time.time()
+    generate_popular_rank(db)
+    print(f"Generate popular rank took {time.time()-start} seconds")
     print("Done")
 
 
@@ -71,12 +78,9 @@ def generate_be_read(db):
                     },
                 }
             },
-            { "$addFields": {
-                "category": "science",
-            }},
             {
                 "$replaceWith": {
-                    "$mergeObjects": [ # put the current timestamp in the document
+                    "$mergeObjects": [
                         {"_id": "$_id", "timestamp": "$$NOW" },
                         "$$ROOT",
                     ]
@@ -96,7 +100,7 @@ def generate_popular_rank(db):
                 "_id": {"id": "$aid", "date": {"$dateToString": {"format": granularity[0], "date": {"$toDate": {"$toLong": "$timestamp"}}}}},
                 "count": {"$sum": 1}}},
             {"$addFields": {
-                "granularity": granularity[1]}},
+                "temporalGranularity": granularity[1]}},
             {"$sort": {
                 "count": -1,
             }},
