@@ -132,7 +132,7 @@ def handleUpdateUser(db):
         logError("No user found with that uid")
         return
     user = db.user.update_one({"_id": ObjectId(sys.argv[3])}, {"$set": {sys.argv[4]: sys.argv[5]}})
-    print(f"Updated the user's region from {currentUser[sys.argv[4]]} to {sys.argv[5]}")
+    print(f"Updated the user's {sys.argv[4]} from {currentUser[sys.argv[4]]} to {sys.argv[5]}")
 
 def handleUpdateArticle(db):
     if hasEnoughArgs(4, "article id", "update") == False:
@@ -142,7 +142,7 @@ def handleUpdateArticle(db):
         logError("No article found with that aid")
         return
     article = db.article.update_one({"_id": ObjectId(sys.argv[3])}, {"$set": {sys.argv[4]: sys.argv[5]}})
-    print(f"Updated the article's category from {currentArticle[sys.argv[4]]} to {sys.argv[5]}")
+    print(f"Updated the article's {sys.argv[4]} from {currentArticle[sys.argv[4]]} to {sys.argv[5]}")
 
 
 

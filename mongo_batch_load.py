@@ -23,13 +23,13 @@ def main():
         sys.exit(1)
 
     start = time.time()
-    batch_load_into_db(db, data_folder)
+    #batch_load_into_db(db, data_folder)
     print(f"Batch load into db took {time.time()-start} seconds")
     start = time.time()
     generate_be_read(db)
     print(f"Generate be read took {time.time()-start} seconds")
     start = time.time()
-    generate_popular_rank(db)
+    #generate_popular_rank(db)
     print(f"Generate popular rank took {time.time()-start} seconds")
     print("Done")
 
