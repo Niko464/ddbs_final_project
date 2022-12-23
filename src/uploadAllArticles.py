@@ -2,7 +2,7 @@ from hdfs import InsecureClient
 import os
 from pathlib import Path
 import time
-
+import sys
 
 
 def uploadEntireArticle(hdfsclient, path, articleId):
@@ -21,8 +21,11 @@ def uploadEntireArticle(hdfsclient, path, articleId):
 
 
 def main():
+    if len(sys.argv) != 2:
+        print("Usage: python uploadAllArticles.py <path to data>")
+        sys.exit(1)
     hdfsclient = InsecureClient("http://localhost:9870", user="root")
-    DATA_FOLDER = "../data/"
+    DATA_FOLDER = sys.argv[1]
     ARTICLES_DIR = f"{DATA_FOLDER}/articles/"
 
     start = time.time()
