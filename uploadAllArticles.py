@@ -30,23 +30,14 @@ def main():
     ARTICLES_DIR = f"{DATA_FOLDER}/articles/"
 
     start = time.time()
-    files_and_directories = os.listdir(ARTICLES_DIR)
     print("Starting...")
-    # uploadEntireArticle(hdfsclient, "../data/articles/article1", "article1")
-    # hdfsclient.upload(
-    #     hdfs_path="/data/articles/",
-    #     local_path=ARTICLES_DIR,
-    #     overwrite=True,
-    #     n_threads=256,
-    #     cleanup=True,
-    # )
-
-    for item in files_and_directories:
-        path = os.path.join(ARTICLES_DIR, item)
-        if int(item[7:]) < 5001:
-            continue
-        if os.path.isdir(path):
-            uploadEntireArticle(hdfsclient, path, item)
+    hdfsclient.upload(
+        hdfs_path="/data/articles/",
+        local_path=ARTICLES_DIR,
+        overwrite=True,
+        n_threads=256,
+        cleanup=True,
+    )
     end = time.time()
     print(f"Time taken to upload: {round(end - start, 2)}s")
 
