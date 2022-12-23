@@ -8,10 +8,12 @@ import time
 
 
 def main():
-    connection_string = sys.argv[1] if len(
-        sys.argv) > 1 else 'mongodb://localhost:27017/'
-    data_folder = sys.argv[2] if len(
-        sys.argv) > 2 else '/home/cbihan/db-generation'
+    if len(sys.argv) < 2:
+        print("Usage: python mongo_batch_load.py <path to data>")
+        sys.exit(1)
+    connection_string = 'mongodb://localhost:27017/'
+    data_folder = sys.argv[1] if len(
+        sys.argv) >= 2 else '/home/cbihan/db-generation'
     db = None
     try:
         client = pymongo.MongoClient(
@@ -23,13 +25,13 @@ def main():
         sys.exit(1)
 
     start = time.time()
-    #batch_load_into_db(db, data_folder)
+    batch_load_into_db(db, data_folder)
     print(f"Batch load into db took {time.time()-start} seconds")
     start = time.time()
     generate_be_read(db)
     print(f"Generate be read took {time.time()-start} seconds")
     start = time.time()
-    #generate_popular_rank(db)
+    generate_popular_rank(db)
     print(f"Generate popular rank took {time.time()-start} seconds")
     print("Done")
 
